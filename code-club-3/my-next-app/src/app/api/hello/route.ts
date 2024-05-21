@@ -1,36 +1,32 @@
-import type { NextRequest } from 'next/server'
-import { getRequestContext } from '@cloudflare/next-on-pages'
+import type { NextRequest } from 'next/server';
 
-export const runtime = 'edge'
+export const runtime = 'edge';
 
-export async function GET(request: NextRequest) {
+export async function handleRequest(request: NextRequest) {
+  const GREETINGS_MAP: { [key: string]: string } = {
+    0: "Hello and farewell!",
+    1: "Ciao e arrivederci!",
+    2: "Hallo en tot ziens!",
+    3: "Привет и до свидания!",
+    4: "안녕히 가세요!",
+  };
 
-	const COUNTRY_MAP: {[key: string]: string } =  {
-		0: "Thank you for cominng, please come again!",
-		1: "Merci d'être venu, revenez s'il vous plaît!",
-		2: "¡Gracias por venir, por favor vuelve!",
-		3: "„Danke für Ihr Kommen, bitte kommen Sie wieder!",
-		4: "「来てくれてありがとう、また来てね！」",
-	};
+  const randomIndex = Math.floor(Math.random() * 5);
+  let responseMessage: string;
 
-	let random_pick = Math.floor ((Math.random () * 10)) % 5;
-	let body = {};
-	let message;
+  if (request.method === "POST") {
+    responseMessage = "Greetings, POST request received!";
+  } else {
+    responseMessage = "Greetings, non-POST request received!";
+  }
 
-	if (request.method == "POST") {
-		message = "Hello World, you did a POST!";
-	} else {
-		message = "Hello World, you did not do a POST!";
-	}
+  const responseBody = {
+    message: responseMessage + " " + GREETINGS_MAP[randomIndex],
+  };
 
-	const OUTPUT = {
-		result: message + " " + COUNTRY_MAP [random_pick],
-	};
-
-	return new Response (JSON.stringify (OUTPUT), {
-		headers: {
-			 'content-type': 'application/json;charset=UTF-8',
-		},
-	});
+  return new Response(JSON.stringify(responseBody), {
+    headers: {
+      'content-type': 'application/json; charset=UTF-8',
+    },
+  });
 }
-
