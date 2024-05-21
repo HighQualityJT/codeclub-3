@@ -1,28 +1,36 @@
-//site https://codeclub4.erichayth.com/api/hello
+import type { NextRequest } from 'next/server'
+import { getRequestContext } from '@cloudflare/next-on-pages'
 
-import { NextRequest, NextResponse } from 'next/server';
+export const runtime = 'edge'
 
-// Define the runtime environment
-export const runtime = 'edge';
+export async function GET(request: NextRequest) {
 
-// Define the response mapping
-const responseArray: { [key: number]: string } = {
-  1: "You're contestant number 1",
-  2: "You're contestant number 2",
-  3: "You're contestant number 3",
-  4: "You're contestant number 4"
-};
+	const COUNTRY_MAP: {[key: string]: string } =  {
+		0: "Thank you for cominng, please come again!",
+		1: "Merci d'être venu, revenez s'il vous plaît!",
+		2: "¡Gracias por venir, por favor vuelve!",
+		3: "„Danke für Ihr Kommen, bitte kommen Sie wieder!",
+		4: "「来てくれてありがとう、また来てね！」",
+	};
 
-// Function to generate a random number and return the corresponding message
-function getRandomMessage(): string {
-  const id = Math.floor(Math.random() * 4) + 1; // Generate a random number between 1 and 4
-  return responseArray[id]; // Return the message associated with the random number
+	let random_pick = Math.floor ((Math.random () * 10)) % 5;
+	let body = {};
+	let message;
+
+	if (request.method == "POST") {
+		message = "Hello World, you did a POST!";
+	} else {
+		message = "Hello World, you did not do a POST!";
+	}
+
+	const OUTPUT = {
+		result: message + " " + COUNTRY_MAP [random_pick],
+	};
+
+	return new Response (JSON.stringify (OUTPUT), {
+		headers: {
+			 'content-type': 'application/json;charset=UTF-8',
+		},
+	});
 }
 
-// API route handler function
-export async function GET(request: NextRequest): Promise<NextResponse> {
-  const responseMessage = getRandomMessage(); // Call the function to get a random message
-  return new NextResponse(responseMessage, {
-    headers: { 'content-type': 'text/plain' }
-  });
-}
